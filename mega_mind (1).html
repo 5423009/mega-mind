@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#E8EDF5">
+<title>Mega Mind — Сэтгэхүйн сорил</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Unbounded:wght@700;900&display=swap');
+:root{color-scheme:light dark;--bg:#E8EDF5;--ink:#14213D;--card:#FFFFFF;--accent:#FFB703;--muted:#55627A;--line:#C9D3E3;--success:#1F8A5B;--error:#C8463B;--shadow:0 12px 32px rgba(20,33,61,.08);--focus:#2356B8}
+:root[data-theme="light"]{color-scheme:light;--bg:#E8EDF5;--ink:#14213D;--card:#FFFFFF;--muted:#55627A;--line:#C9D3E3;--success:#1F8A5B;--error:#C8463B}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0F1626;--ink:#E8EDF5;--card:#18223A;--muted:#9AA8C2;--line:#2A3858;--success:#3DBE88;--error:#F07A6F;--shadow:0 12px 32px rgba(0,0,0,.2);--focus:#FFCF55}
+@media(prefers-color-scheme:dark){:root:not([data-theme]){color-scheme:dark;--bg:#0F1626;--ink:#E8EDF5;--card:#18223A;--muted:#9AA8C2;--line:#2A3858;--success:#3DBE88;--error:#F07A6F;--shadow:0 12px 32px rgba(0,0,0,.2);--focus:#FFCF55}}
+*{box-sizing:border-box}
+html{min-height:100%;background:var(--bg)}
+body{margin:0;min-height:100vh;min-height:100dvh;padding:calc(18px + env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom));font:400 17px/1.5 Onest,system-ui,sans-serif;color:var(--ink);background-color:var(--bg);background-image:radial-gradient(var(--line) .8px,transparent .8px);background-size:18px 18px}
+button,input{font:inherit}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed;opacity:.45}
+button:focus-visible,input:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.shell{width:100%;max-width:640px;margin:0 auto}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.theme-toggle{width:42px;height:42px;border:1px solid var(--line);border-radius:50%;background:var(--card);color:var(--ink);font-size:22px}
+.wordmark{font:900 clamp(42px,11vw,76px)/1.05 Unbounded,system-ui,sans-serif;letter-spacing:-.07em;margin:6px 0 20px}
+.wordmark .mind{display:inline-block;background:var(--accent);color:#14213D;padding:0 .12em .08em;margin-left:.04em}
+.squares{display:grid;grid-template-columns:repeat(20,minmax(0,1fr));gap:5px;margin:20px 0 26px}
+.sq{aspect-ratio:1;border:1px solid var(--line);border-radius:3px;background:var(--card);min-width:0}
+.sq.done{background:var(--accent);border-color:var(--accent)}
+.sq.current{outline:2px solid var(--ink);outline-offset:2px}
+.sq.correct{background:var(--success);border-color:var(--success)}
+.sq.wrong{background:var(--error);border-color:var(--error)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:clamp(20px,5vw,30px);box-shadow:var(--shadow)}
+h1,h2,h3,p{margin-top:0}
+h1,h2,.big-number{font-family:Unbounded,system-ui,sans-serif;letter-spacing:-.04em}
+h1{font-size:clamp(25px,6vw,34px);line-height:1.25;margin-bottom:12px}
+h2{font-size:clamp(20px,5vw,26px);line-height:1.3;margin-bottom:16px}
+p{margin-bottom:18px}
+.muted{color:var(--muted)}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0}
+.pill{font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:6px 11px;background:var(--bg)}
+.btn{border:1px solid var(--ink);border-radius:10px;background:var(--ink);color:var(--card);font-weight:600;padding:13px 18px;min-height:50px;transition:transform .15s,opacity .15s;width:100%}
+.btn:hover:not(:disabled){transform:translateY(-1px)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#14213D}
+.btn.secondary{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn-row{display:flex;gap:10px;margin-top:20px}
+.btn-row .btn{flex:1}
+.disclaimer{font-size:13px;line-height:1.55;color:var(--muted);margin:18px 2px 0}
+.quiz-meta{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:14px;margin-bottom:14px}
+.timer{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink)}
+.question{font-size:clamp(20px,5vw,25px);line-height:1.4;margin-bottom:22px}
+.options{display:grid;gap:10px}
+.option{display:flex;align-items:center;gap:12px;text-align:left;width:100%;min-height:58px;border:1px solid var(--line);border-radius:10px;padding:10px 13px;background:var(--card);color:var(--ink)}
+.option.selected{border:2px solid var(--ink);padding:9px 12px}
+.option .letter{display:grid;place-items:center;flex:0 0 34px;height:34px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-weight:600;color:var(--muted)}
+.option.selected .letter{background:var(--accent);border-color:var(--accent);color:#14213D}
+.option .option-text{overflow-wrap:anywhere}
+.field-label{display:block;font-size:14px;font-weight:600;margin:18px 0 7px}
+.text-field{width:100%;min-height:52px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--bg);color:var(--ink)}
+.error{color:var(--error);font-size:14px;min-height:22px;margin:8px 0 0}
+.pay-preview{filter:blur(7px);user-select:none;pointer-events:none;border:1px dashed var(--line);border-radius:10px;padding:14px;text-align:center;margin:18px 0;background:var(--bg)}
+.preview-score{font:900 30px Unbounded,system-ui,sans-serif}
+.price{font:900 30px Unbounded,system-ui,sans-serif;margin:8px 0 14px}
+.qr-box{display:grid;place-items:center;min-height:180px;border:2px dashed var(--line);border-radius:12px;background:var(--bg);padding:14px;text-align:center;color:var(--muted);font-size:14px;overflow:hidden}
+.qr-box img{display:block;max-width:100%;max-height:240px;object-fit:contain}
+.bank-info{white-space:pre-line;font-size:14px;background:var(--bg);border-radius:10px;padding:13px;margin:14px 0}
+.contact-line{font-size:13px;color:var(--muted);margin:14px 0 0}
+.result-head{text-align:center}
+.result-name{font-weight:600;color:var(--muted);margin-bottom:10px}
+.gauge{width:min(220px,65vw);margin:18px auto 8px;display:block}
+.gauge-track{stroke:var(--line)}
+.gauge-progress{stroke:var(--accent);stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;stroke-dasharray:565.49;stroke-dashoffset:565.49}
+.gauge-number{font:900 44px Unbounded,system-ui,sans-serif;fill:var(--ink)}
+.band{display:inline-block;background:var(--accent);color:#14213D;border-radius:99px;padding:8px 14px;font-weight:600;margin:6px 0 14px}
+.result-summary{text-align:center;color:var(--muted);font-size:15px}
+.result-grid{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:7px;margin:22px 0}
+.result-grid .sq{aspect-ratio:1.15}
+.small-note{font-size:12px;color:var(--muted);text-align:center;margin-top:14px}
+.hidden{display:none!important}
+@media(min-width:520px){.squares{gap:7px}.card{padding:30px}.btn-row .btn{max-width:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="topbar">
+    <div class="eyebrow">Сэтгэхүйн сорил · № 01</div>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Гэрэлтэй болон бараан горим солих" title="Горим солих">◐</button>
+  </header>
+  <div class="wordmark" aria-label="Mega Mind">MEGA <span class="mind">MIND</span></div>
+  <div class="squares" id="progressSquares" aria-label="20 асуултын явц" aria-hidden="true"></div>
+
+  <section class="card screen" id="introScreen">
+    <h1>Оюун ухаанаа сорь.</h1>
+    <p class="muted">Логик, тоон зүй тогтол, анхаарал шаардсан 20 бодлого. Тайван төвлөрөөд, өөрийн хурдаар биш цагтай уралдан бодоорой.</p>
+    <div class="pills"><span class="pill">20 асуулт</span><span class="pill">Хугацаатай</span><span class="pill">Хүнд түвшин</span></div>
+    <button class="btn primary" id="startBtn" type="button">Сорил эхлүүлэх</button>
+    <p class="disclaimer">Энэхүү сорил нь зугаа, өөрийгөө сорих зорилготой. Эмнэлзүйн болон мэргэжлийн IQ үнэлгээ биш бөгөөд оношилгоонд ашиглахгүй.</p>
+  </section>
+
+  <section class="card screen hidden" id="quizScreen" aria-live="polite">
+    <div class="quiz-meta"><span id="questionCounter">Асуулт 1 / 20</span><span class="timer" id="timer">0:00</span></div>
+    <h2 class="question" id="questionText"></h2>
+    <div class="options" id="options"></div>
+    <div class="btn-row">
+      <button class="btn primary" id="nextBtn" type="button" disabled>Дараах</button>
+      <button class="btn secondary" id="restartBtn" type="button">Дахин эхлүүлэх</button>
+    </div>
+  </section>
+
+  <section class="card screen hidden" id="nameScreen">
+    <h1>Сорил дууслаа.</h1>
+    <p class="muted">Үр дүнгээ хадгалахын тулд нэрээ оруулна уу.</p>
+    <form id="nameForm">
+      <label class="field-label" for="userName">Таны нэр</label>
+      <input class="text-field" id="userName" name="userName" type="text" maxlength="60" autocomplete="name" required placeholder="Нэрээ бичнэ үү">
+      <p class="disclaimer">И-мэйл хаяг шаардахгүй. Энэ хуудас таны мэдээллийг сервер рүү илгээхгүй.</p>
+      <button class="btn primary" type="submit">Үргэлжлүүлэх</button>
+    </form>
+  </section>
+
+  <section class="card screen hidden" id="paymentScreen">
+    <h1>Үр дүнгээ нээх</h1>
+    <p class="muted">Таны сорилын үр дүн бэлэн боллоо. Төлбөр баталгаажсаны дараа нээх код авна.</p>
+    <div class="pay-preview" aria-label="Бүдэглэсэн үр дүнгийн урьдчилсан харагдац">
+      <div class="preview-score" id="previewScore">— оноо</div>
+      <div id="previewBand">Үр дүнгийн түвшин</div>
+    </div>
+    <div class="eyebrow">Үр дүн нээх үнэ</div>
+    <div class="price" id="priceText">5,000₮</div>
+    <div class="qr-box" id="qrBox" aria-label="Банкны QR код">
+      <span>Таны дансны QR код энд харагдана</span>
+    </div>
+    <div class="bank-info" id="bankInfo">Банкны мэдээллийг тохиргоонд оруулна уу.</div>
+    <form id="codeForm">
+      <label class="field-label" for="confirmationCode">Баталгаажуулах код</label>
+      <input class="text-field" id="confirmationCode" type="text" autocomplete="off" spellcheck="false" required placeholder="Төлбөрийн дараа авсан код">
+      <p class="error" id="codeError" role="alert"></p>
+      <button class="btn primary" type="submit" id="showResultBtn">Үр дүн харах</button>
+    </form>
+    <p class="contact-line" id="contactLine">Төлбөр хийсний дараа код авна. Холбоо барих: тохиргоонд оруулна уу.</p>
+  </section>
+
+  <section class="card screen hidden" id="resultScreen">
+    <div class="result-head">
+      <div class="result-name" id="resultName"></div>
+      <h1>Таны үр дүн</h1>
+      <svg class="gauge" viewBox="0 0 220 220" role="img" aria-label="Онооны хэмжүүр">
+        <circle class="gauge-track" cx="110" cy="110" r="90" fill="none" stroke-width="12"></circle>
+        <circle class="gauge-progress" id="gaugeProgress" cx="110" cy="110" r="90" fill="none" stroke-width="12"></circle>
+        <text class="gauge-number" id="gaugeNumber" x="110" y="121" text-anchor="middle">0</text>
+      </svg>
+      <div class="eyebrow">Тооцоолсон оноо</div>
+      <div class="band" id="resultBand"></div>
+      <p class="result-summary" id="resultSummary"></p>
+    </div>
+    <div class="eyebrow">Асуултын хариултын зураглал</div>
+    <div class="result-grid" id="resultGrid" aria-label="Зөв болон буруу хариултын зураглал"></div>
+    <p class="disclaimer">Энэ оноо нь зөвхөн энэхүү сорилын дотоод онооллын дагуу тооцогдсон үзүүлэлт бөгөөд стандартчилсан IQ оноо биш.</p>
+    <button class="btn primary" id="copyBtn" type="button">Үр дүн хуулах</button>
+    <p class="small-note" id="copyStatus" role="status"></p>
+  </section>
+  <footer class="small-note">MEGA MIND · Өөрийгөө сорьж, сэтгэхүйгээ хөгжүүл.</footer>
+</main>
+
+<script>
+/*
+ТОХИРГОО: PRICE-д үнийг, QR_SRC-д QR зургийн URL эсвэл data: URI-г,
+BANK_INFO-д дансны мэдээллийг, CONTACT-д холбоо барих мэдээллийг оруулна.
+CODE_HASH нь нээх кодын SHA-256 хэш байна. Шинэ кодын хэш үүсгэх жишээ:
+crypto.subtle.digest('SHA-256', new TextEncoder().encode('ТАНЫ_ШИНЭ_КОД'))
+дараа нь байтуудыг 2 оронтой hex болгон хөрвүүлж доорх CODE_HASH-д тавина.
+Хуудаст энгийн кодыг хэзээ ч бүү хадгал. Клиент талын шалгалт нь бүрэн хамгаалалт биш.
+*/
+const CONFIG = {
+  PRICE: "5,000₮",
+  QR_SRC: "",
+  BANK_INFO: "Банк: [Банкны нэр]\nДанс эзэмшигч: [Нэр]\nДансны дугаар: [Дансны дугаар]\nГүйлгээний утга: Mega Mind",
+  CONTACT: "[Утас эсвэл олон нийтийн сүлжээ]",
+  CODE_HASH: "REPLACE_WITH_SHA256_HEX"
+};
+
+const QUESTIONS = [
+  {q:"Дарааллын дараагийн тоог ол: 2, 6, 12, 20, 30, ?",o:["40","42","44","46"],a:1},
+  {q:"Дарааллын дараагийн тоог ол: 3, 7, 16, 35, 74, ?",o:["148","151","153","157"],a:2},
+  {q:"Дарааллын дараагийн тоог ол: 1, 2, 6, 24, 120, ?",o:["600","640","720","840"],a:2},
+  {q:"Монгол цагаан толгойн дарааллыг ажигла. А, В, Е, И, Н, ?\nЦагаан толгой: А, Б, В, Г, Д, Е, Ё, Ж, З, И, Й, К, Л, М, Н, О, Ө, П, Р, С, Т, У, Ү, Ф, Х, Ц, Ч, Ш, Щ, Ъ, Ы, Ь, Э, Ю, Я",o:["С","Т","У","Р"],a:1},
+  {q:"5 машин 5 минутын дотор 5 ширхэг бүтээгдэхүүн хийдэг. 100 машин 100 бүтээгдэхүүн хийхэд хэдэн минут хэрэгтэй вэ?",o:["1 минут","5 минут","20 минут","100 минут"],a:1},
+  {q:"А цэгээс Б цэг хүртэл 60 км/ц хурдтай явж, буцахдаа 40 км/ц хурдтай явжээ. Нийт замын дундаж хурд хэд вэ?",o:["50 км/ц","48 км/ц","45 км/ц","52 км/ц"],a:1},
+  {q:"Бүх А нь Б. Зарим Б нь В. Аль өгүүлбэр заавал үнэн бэ?",o:["Зарим А нь В","Бүх В нь Б","Зарим В нь Б","Ямар ч А нь В биш"],a:2},
+  {q:"Хоёр шоог зэрэг орхиход нүднүүдийн нийлбэр 9 гарах магадлал хэд вэ?",o:["1/12","1/9","1/6","5/36"],a:1},
+  {q:"Аав нь хүүгээсээ 24 насаар ах. Зургаан жилийн өмнө аав нь хүүгээсээ яг 5 дахин ах байсан бол хүү одоо хэдэн настай вэ?",o:["10","12","14","16"],a:1},
+  {q:"Аль тоо бусдаасаа ялгаатай вэ? 144, 169, 200, 225",o:["144","169","200","225"],a:2},
+  {q:"Гадна тал нь бүхэлдээ будсан 3×3×3 шоо 27 жижиг шоонд хуваагджээ. Яг хоёр тал нь будагтай хэдэн жижиг шоо байх вэ?",o:["8","12","6","24"],a:1},
+  {q:"Цаг 3:15 болж байхад цагийн зүү ба минутын зүүний хоорондох бага өнцөг хэд вэ?",o:["0°","7.5°","15°","22.5°"],a:1},
+  {q:"80-ын 15% дээр 15-ын 80%-ийг нэмбэл хэд гарах вэ?",o:["12","24","36","48"],a:1},
+  {q:"Хос тоонуудын зүй тогтлыг ол: (3, 10), (4, 17), (5, 26), (6, ?)",o:["35","36","37","38"],a:2},
+  {q:"Уралдаанд та хоёрдугаар байрт явж буй хүнийг гүйцэж түрүүлэв. Та одоо хэддүгээр байрт явж байна вэ?",o:["1-р байр","2-р байр","3-р байр","Тодорхойлох боломжгүй"],a:1},
+  {q:"А хүн ажлыг 6 өдөрт, Б хүн 12 өдөрт хийдэг. Хоёулаа хамтдаа ажиллавал хэдэн өдөрт дуусгах вэ?",o:["3 өдөр","4 өдөр","6 өдөр","9 өдөр"],a:1},
+  {q:"5 хүнийг дугуй ширээний эргэн тойронд, эргүүлсэн байрлалыг ижилд тооцвол хэдэн янзаар суулгаж болох вэ?",o:["24","60","120","12"],a:0},
+  {q:"2¹⁰ + 2¹⁰ = ?",o:["2²⁰","2¹¹","4¹⁰","2¹⁰⁰"],a:1},
+  {q:"Дарааллын дараагийн тоог ол: 2, 100, 4, 50, 8, 25, 16, ?",o:["10","12.5","15","20"],a:1},
+  {q:"Барааны үнэ эхлээд 20%-иар өсөөд, дараа нь шинэ үнээсээ 20%-иар буурчээ. Эцсийн үнэ анхны үнийн хэдэн хувьтай тэнцэх вэ?",o:["100%","98%","96%","94%"],a:2}
+];
+
+const $ = id => document.getElementById(id);
+const screens = ["introScreen","quizScreen","nameScreen","paymentScreen","resultScreen"].map($);
+let index = 0, answers = Array(QUESTIONS.length).fill(null), startedAt = 0, elapsed = 0, timerHandle = null, playerName = "", resultUnlocked = false;
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function showScreen(target){
+  screens.forEach(s=>s.classList.toggle("hidden",s!==target));
+  window.scrollTo({top:0,behavior:reducedMotion?"auto":"smooth"});
+}
+function renderProgress(mode="quiz"){
+  const host=$("progressSquares"); host.replaceChildren();
+  QUESTIONS.forEach((q,i)=>{
+    const sq=document.createElement("span"); sq.className="sq";
+    if(mode==="quiz" && i<index) sq.classList.add("done");
+    if(mode==="quiz" && i===index) sq.classList.add("current");
+    if(mode==="result") sq.classList.add(answers[i]===q.a?"correct":"wrong");
+    host.appendChild(sq);
+  });
+}
+function formatTime(seconds){
+  const s=Math.max(0,Math.floor(seconds));
+  return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+}
+function updateTimer(){
+  elapsed=Math.floor((Date.now()-startedAt)/1000);
+  $("timer").textContent=formatTime(elapsed);
+}
+function startTimer(){
+  clearInterval(timerHandle); startedAt=Date.now()-elapsed*1000; updateTimer();
+  timerHandle=setInterval(updateTimer,250);
+}
+function stopTimer(){updateTimer();clearInterval(timerHandle);timerHandle=null;}
+function startTest(){
+  index=0;answers=Array(QUESTIONS.length).fill(null);elapsed=0;playerName="";resultUnlocked=false;
+  $("userName").value="";$("confirmationCode").value="";$("codeError").textContent="";
+  renderQuestion();renderProgress();showScreen($("quizScreen"));startTimer();
+}
+function renderQuestion(){
+  const q=QUESTIONS[index];
+  $("questionCounter").textContent=`Асуулт ${index+1} / ${QUESTIONS.length}`;
+  $("questionText").textContent=q.q;
+  const host=$("options");host.replaceChildren();
+  q.o.forEach((option,i)=>{
+    const button=document.createElement("button");button.type="button";button.className="option"+(answers[index]===i?" selected":"");
+    button.setAttribute("aria-pressed",answers[index]===i?"true":"false");
+    const badge=document.createElement("span");badge.className="letter";badge.textContent=String.fromCharCode(65+i);
+    const text=document.createElement("span");text.className="option-text";text.textContent=option;
+    button.append(badge,text);button.addEventListener("click",()=>selectAnswer(i));host.appendChild(button);
+  });
+  $("nextBtn").disabled=answers[index]===null;
+  $("nextBtn").textContent=index===QUESTIONS.length-1?"Дуусгах":"Дараах";
+}
+function selectAnswer(choice){
+  answers[index]=choice;
+  [...$("options").children].forEach((button,i)=>{
+    const selected=i===choice;button.classList.toggle("selected",selected);button.setAttribute("aria-pressed",String(selected));
+  });
+  $("nextBtn").disabled=false;
+}
+function correctCount(){return answers.reduce((n,a,i)=>n+(a===QUESTIONS[i].a?1:0),0);}
+function bandFor(correct){
+  if(correct<=5)return "Хөгжих боломжтой";
+  if(correct<=10)return "Дундаж";
+  if(correct<=15)return "Дундажаас дээш";
+  if(correct<=18)return "Өндөр";
+  return "Маш өндөр";
+}
+function calculateScore(){return Math.round(75+correctCount()*3.25);}
+function finishTest(){
+  stopTimer();$("previewScore").textContent=calculateScore()+" оноо";$("previewBand").textContent=bandFor(correctCount());
+  $("userName").value=playerName;showScreen($("nameScreen"));
+}
+function setupPayment(){
+  $("priceText").textContent=CONFIG.PRICE;
+  $("bankInfo").textContent=CONFIG.BANK_INFO;
+  $("contactLine").textContent="Төлбөр хийсний дараа код авна. Холбоо барих: "+CONFIG.CONTACT;
+  const box=$("qrBox");box.replaceChildren();
+  if(CONFIG.QR_SRC.trim()){
+    const img=document.createElement("img");img.src=CONFIG.QR_SRC;img.alt="Банкны төлбөрийн QR код";
+    img.onerror=()=>{box.replaceChildren();const msg=document.createElement("span");msg.textContent="QR зураг ачаалж чадсангүй. Тохиргооны QR холбоосыг шалгана уу.";box.appendChild(msg);};
+    box.appendChild(img);
+  }else{
+    const msg=document.createElement("span");msg.textContent="Таны дансны QR код энд харагдана";box.appendChild(msg);
+  }
+  showScreen($("paymentScreen"));
+}
+async function sha256Hex(value){
+  const bytes=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,"0")).join("");
+}
+async function checkCode(code){
+  if(!/^[a-f0-9]{64}$/i.test(CONFIG.CODE_HASH)) return false;
+  try{return (await sha256Hex(code.trim())).toLowerCase()===CONFIG.CODE_HASH.toLowerCase();}
+  catch(e){return false;}
+}
+function showResult(){
+  const correct=correctCount(),score=calculateScore();
+  $("resultName").textContent=playerName;
+  $("gaugeNumber").textContent=String(score);
+  $("resultBand").textContent=bandFor(correct);
+  $("resultSummary").textContent=`${correct} / 20 зөв. Хугацаа: ${formatTime(elapsed)}`;
+  const grid=$("resultGrid");grid.replaceChildren();
+  QUESTIONS.forEach((q,i)=>{
+    const sq=document.createElement("span");sq.className="sq "+(answers[i]===q.a?"correct":"wrong");
+    sq.setAttribute("aria-label",`Асуулт ${i+1}: ${answers[i]===q.a?"зөв":"буруу"}`);grid.appendChild(sq);
+  });
+  const progress=$("gaugeProgress"),circ=2*Math.PI*90;
+  progress.style.strokeDasharray=String(circ);
+  progress.style.strokeDashoffset=String(circ);
+  showScreen($("resultScreen"));renderProgress("result");
+  const target=circ*(1-(score-75)/65);
+  if(reducedMotion){progress.style.strokeDashoffset=String(target);}
+  else requestAnimationFrame(()=>{progress.style.transition="stroke-dashoffset 1.1s ease";progress.style.strokeDashoffset=String(target);});
+}
+function restart(){
+  if(confirm("Сорилыг эхнээс нь дахин эхлүүлэх үү? Таны одоогийн хариултууд устах болно."))startTest();
+}
+$("themeToggle").addEventListener("click",()=>{
+  const root=document.documentElement;
+  const current=root.dataset.theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+  root.dataset.theme=current==="dark"?"light":"dark";
+});
+$("startBtn").addEventListener("click",startTest);
+$("nextBtn").addEventListener("click",()=>{
+  if(answers[index]===null)return;
+  if(index<QUESTIONS.length-1){index++;renderQuestion();renderProgress();}
+  else finishTest();
+});
+$("restartBtn").addEventListener("click",restart);
+$("nameForm").addEventListener("submit",e=>{
+  e.preventDefault();const name=$("userName").value.trim();
+  if(!name){$("userName").focus();return;}
+  playerName=name;setupPayment();
+});
+$("codeForm").addEventListener("submit",async e=>{
+  e.preventDefault();const button=$("showResultBtn");button.disabled=true;$("codeError").textContent="";
+  const code=$("confirmationCode").value;
+  const valid=await checkCode(code);
+  button.disabled=false;
+  if(valid){resultUnlocked=true;showResult();}
+  else $("codeError").textContent="Код буруу байна. Төлбөр баталгаажсаны дараа илгээсэн кодоо шалгаад дахин оруулна уу.";
+});
+$("copyBtn").addEventListener("click",async()=>{
+  const text=`MEGA MIND — Сэтгэхүйн сорил\nНэр: ${playerName}\nОноо: ${calculateScore()}\nТүвшин: ${bandFor(correctCount())}\nЗөв хариулт: ${correctCount()} / 20\nХугацаа: ${formatTime(elapsed)}`;
+  const status=$("copyStatus");
+  try{
+    if(!navigator.clipboard||!navigator.clipboard.writeText)throw new Error("clipboard unavailable");
+    await navigator.clipboard.writeText(text);status.textContent="Үр дүнг хууллаа.";
+  }catch(e){
+    status.textContent="Автоматаар хуулах боломжгүй байна. Доорх үр дүнг гараар хуулна уу: "+text;
+  }
+});
+document.addEventListener("keydown",e=>{
+  if($("quizScreen").classList.contains("hidden"))return;
+  if(e.key==="Enter"){
+    if(e.target instanceof HTMLButtonElement || e.target instanceof HTMLInputElement)return;
+    if(! $("nextBtn").disabled){e.preventDefault();$("nextBtn").click();}
+    return;
+  }
+  if(e.altKey||e.ctrlKey||e.metaKey||e.target.matches("input,textarea,select"))return;
+  const key=e.key.toUpperCase();
+  const choice=/^[1-4]$/.test(key)?Number(key)-1:("ABCD".includes(key)?key.charCodeAt(0)-65:-1);
+  if(choice>=0){e.preventDefault();selectAnswer(choice);}
+});
+renderProgress();
+</script>
+</body>
+</html>
